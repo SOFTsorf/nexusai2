@@ -3,125 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini KI - Nexus AI</title>
+    <title>Nexus AI - Gemini</title>
     <style>
-        :root {
-            --primary: #1a73e8;
-            --bg: #f0f2f5;
-        }
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background-color: var(--bg);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-        }
-        .chat-card {
-            background: white;
-            padding: 2rem;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            width: 90%;
-            max-width: 500px;
-        }
-        h2 { color: var(--primary); margin-top: 0; font-size: 1.5rem; }
-        textarea {
-            width: 100%;
-            height: 120px;
-            padding: 15px;
-            border: 2px solid #eee;
-            border-radius: 10px;
-            resize: none;
-            box-sizing: border-box;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-        textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-        button {
-            width: 100%;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 14px;
-            margin-top: 15px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: opacity 0.2s;
-        }
-        button:hover { opacity: 0.9; }
-        button:disabled { background-color: #ccc; cursor: not-allowed; }
-        #output {
-            margin-top: 25px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-left: 5px solid var(--primary);
-            border-radius: 8px;
-            min-height: 50px;
-            color: #333;
-            line-height: 1.6;
-            word-wrap: break-word;
-        }
-        .error-msg { color: #d93025; font-weight: bold; }
+        body { font-family: sans-serif; background: #f4f7f6; display: flex; justify-content: center; padding: 20px; }
+        .card { background: white; padding: 25px; border-radius: 15px; shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 450px; border: 1px solid #ddd; }
+        h2 { color: #007bff; margin-bottom: 15px; }
+        textarea { width: 100%; height: 100px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; background: #007bff; color: white; border: none; padding: 12px; margin-top: 10px; border-radius: 8px; cursor: pointer; font-size: 16px; }
+        button:disabled { background: #999; }
+        #output { margin-top: 20px; padding: 15px; background: #eee; border-radius: 8px; white-space: pre-wrap; font-size: 15px; min-height: 40px; }
     </style>
 </head>
 <body>
 
-<div class="chat-card">
-    <h2>Gemini KI-Chat</h2>
-    <textarea id="promptInput" placeholder="Stelle eine Frage an die KI..."></textarea>
-    <button id="submitBtn">Abschicken</button>
-    <div id="output">Die Antwort erscheint hier...</div>
+<div class="card">
+    <h2>Nexus AI Chat</h2>
+    <textarea id="txtInput" placeholder="Frag mich etwas..."></textarea>
+    <button id="btnSend">Abschicken</button>
+    <div id="output">Bereit für deine Anfrage.</div>
 </div>
 
 <script type="module">
-    // Import des Google AI SDK
-    import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
+    // Wir nutzen eine spezifische Version des SDKs
+    import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai@0.1.0";
 
-    // DEIN API-KEY
     const API_KEY = "AIzaSyDbFvqgb2lOTzrN02zUq6vJ6Ik1GHk_nCw";
-    
-    // Initialisierung mit dem neuesten Flash-Modell
     const genAI = new GoogleGenerativeAI(API_KEY);
-    
-    // Fix: Wir nutzen 'gemini-1.5-flash-latest' für bessere Kompatibilität
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
-    const btn = document.getElementById('submitBtn');
-    const input = document.getElementById('promptInput');
+    // Wir probieren hier das Basis 'gemini-pro' Modell, 
+    // da Flash manchmal regionale Beschränkungen in der v1beta hat
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+    const btn = document.getElementById('btnSend');
+    const input = document.getElementById('txtInput');
     const output = document.getElementById('output');
 
-    btn.addEventListener('click', async () => {
-        const text = input.value.trim();
-        if (!text) return;
+    btn.onclick = async () => {
+        const prompt = input.value.trim();
+        if (!prompt) return;
 
-        // UI Updates
         btn.disabled = true;
-        btn.innerText = "Verbindung wird aufgebaut...";
-        output.innerHTML = '<em>Gemini schreibt...</em>';
+        btn.innerText = "Verarbeite...";
+        output.innerText = "KI denkt nach...";
 
         try {
-            // API Aufruf
-            const result = await model.generateContent(text);
+            const result = await model.generateContent(prompt);
             const response = await result.response;
-            const responseText = response.text();
-
-            // Ergebnis anzeigen
-            output.innerText = responseText;
-        } catch (error) {
-            console.error("API Fehler:", error);
-            output.innerHTML = `<span class="error-msg">Fehler:</span> ${error.message}`;
+            output.innerText = response.text();
+        } catch (err) {
+            console.error(err);
+            // Spezielle Hilfe bei 404
+            if (err.message.includes("404")) {
+                output.innerHTML = "<b style='color:red'>Fehler 404:</b> Modell nicht gefunden. Probiere in AI Studio den Key für 'Gemini Pro' zu aktivieren oder warte 5 Minuten, bis der Key global aktiv ist.";
+            } else {
+                output.innerText = "Fehler: " + err.message;
+            }
         } finally {
             btn.disabled = false;
             btn.innerText = "Abschicken";
         }
-    });
+    };
 </script>
 
 </body>
