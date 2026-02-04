@@ -3,48 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus Multi-AI</title>
+    <title>Nexus Nexus - Patrick Edition</title>
     <style>
-        :root { --bg: #000; --card: #121212; --text: #ffffff; --sub: #a0a0a0; --blue: #38bdf8; }
+        :root { --bg: #000; --text: #fff; --sub: #a0a0a0; --blue: #38bdf8; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         header { padding: 15px; display: flex; justify-content: center; border-bottom: 1px solid #1a1a1a; }
-        .status-pill { background: #1a1a1a; color: #4caf50; padding: 5px 15px; border-radius: 20px; font-size: 12px; border: 1px solid #333; }
+        .status-pill { background: #1a1a1a; color: #4caf50; padding: 5px 15px; border-radius: 20px; font-size: 11px; border: 1px solid #333; }
         main { flex: 1; padding: 20px; overflow-y: auto; max-width: 600px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; }
-        .welcome { margin-top: 60px; }
-        .welcome h1 { font-size: 34px; font-weight: 500; margin-bottom: 5px; }
-        .welcome p { font-size: 34px; color: var(--sub); margin: 0; font-weight: 500; }
-        .pill-list { display: flex; flex-direction: column; gap: 12px; margin-top: 35px; }
-        .pill { background: #1c1c1c; border: none; color: white; padding: 14px 22px; border-radius: 25px; text-align: left; font-size: 16px; cursor: pointer; width: fit-content; }
-        .msg { margin: 12px 0; padding: 14px 20px; border-radius: 22px; line-height: 1.6; max-width: 85%; }
+        .welcome h1 { font-size: 32px; font-weight: 500; margin-bottom: 5px; }
+        .welcome p { font-size: 32px; color: var(--sub); margin: 0; font-weight: 500; }
+        .pill-list { display: flex; flex-direction: column; gap: 10px; margin-top: 30px; }
+        .pill { background: #1c1c1c; border: none; color: white; padding: 12px 20px; border-radius: 25px; text-align: left; cursor: pointer; width: fit-content; }
+        .msg { margin: 10px 0; padding: 14px 18px; border-radius: 20px; max-width: 85%; line-height: 1.5; }
         .user { background: var(--blue); color: #000; align-self: flex-end; font-weight: 500; }
         .ai { background: #181818; align-self: flex-start; border: 1px solid #222; }
-        .ai img { width: 100%; border-radius: 15px; margin-top: 10px; border: 1px solid #333; }
-        .footer { padding: 25px; display: flex; justify-content: center; background: var(--bg); }
-        .input-bar { background: #181818; width: 100%; max-width: 600px; border-radius: 35px; padding: 6px 18px; display: flex; align-items: center; border: 1px solid #222; }
-        input { flex: 1; background: transparent; border: none; color: white; padding: 12px; font-size: 16px; outline: none; }
-        .send-btn { background: var(--blue); border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-        .loading { font-style: italic; color: var(--sub); font-size: 14px; }
+        .ai img { width: 100%; border-radius: 12px; margin-top: 10px; }
+        .footer { padding: 20px; display: flex; justify-content: center; }
+        .input-bar { background: #181818; width: 100%; max-width: 600px; border-radius: 30px; padding: 5px 15px; display: flex; align-items: center; border: 1px solid #222; }
+        input { flex: 1; background: transparent; border: none; color: white; padding: 10px; font-size: 16px; outline: none; }
+        .send-btn { background: var(--blue); border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-weight: bold; }
+        .error { color: #ff6b6b; border-color: #552222 !important; }
     </style>
 </head>
 <body>
 
-<header><div class="status-pill" id="status">Multi-AI Aktiv (Kein Key)</div></header>
+<header><div class="status-pill">System: Stabil (Multi-Cloud)</div></header>
 
 <main id="chat">
     <div id="intro" class="welcome">
         <h1>Hallo Patrick</h1>
         <p>Womit fangen wir an?</p>
         <div class="pill-list">
-            <button class="pill" onclick="quick('Ein Bild von einem Cyberpunk Auto')">🎨 Bild erstellen</button>
-            <button class="pill" onclick="quick('Erkläre mir Quantenphysik kurz')">📚 Etwas lernen</button>
-            <button class="pill" onclick="quick('Schreib eine kurze Sci-Fi Story')">📄 Etwas schreiben</button>
+            <button class="pill" onclick="quick('Zeichne ein cooles futuristisches Auto')">🎨 Bild generieren</button>
+            <button class="pill" onclick="quick('Erzähl mir einen Witz')">😂 Witz erzählen</button>
+            <button class="pill" onclick="quick('Hilf mir beim Programmieren')">💻 Code Hilfe</button>
         </div>
     </div>
 </main>
 
 <div class="footer">
     <div class="input-bar">
-        <input type="text" id="userInput" placeholder="Frag mich was..." autocomplete="off">
+        <input type="text" id="userInput" placeholder="Schreib mir was..." autocomplete="off">
         <button class="send-btn" id="sendBtn">↑</button>
     </div>
 </div>
@@ -52,45 +51,41 @@
 <script>
     const chat = document.getElementById('chat');
     const input = document.getElementById('userInput');
-    const btn = document.getElementById('sendBtn');
     const intro = document.getElementById('intro');
 
-    async function handleRequest(text) {
+    async function handle(text) {
         if (!text) return;
         if (intro) intro.remove();
-        
         addBubble(text, 'user');
-        const aiBubble = addBubble('KI überlegt...', 'ai');
-        aiBubble.classList.add('loading');
+        const ai = addBubble('Suche beste KI...', 'ai');
         input.value = '';
 
-        // LOGIK: Bild oder Text?
-        const isImageRequest = /bild|generiere|zeichne|foto/i.test(text);
+        const isImage = /bild|zeichne|generiere|foto/i.test(text);
 
-        if (isImageRequest) {
-            // MULTI-BILD-BACKUP (Falls Pollinations 502 hat)
-            const seed = Math.floor(Math.random() * 999999);
-            const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(text)}?width=1024&height=1024&seed=${seed}&nologo=true`;
-            
-            aiBubble.innerHTML = `Hier ist dein Bild:<br><img src="${imgUrl}" onload="this.parentElement.classList.remove('loading')" onerror="this.src='https://picsum.photos/500'">`;
-            aiBubble.classList.remove('loading');
+        if (isImage) {
+            // Backup-System für Bilder
+            const seed = Math.floor(Math.random() * 1000000);
+            const providers = [
+                `https://image.pollinations.ai/prompt/${encodeURIComponent(text)}?seed=${seed}&nologo=true`,
+                `https://api.dicebear.com/7.x/identicon/svg?seed=${seed}` // Notfall-Platzhalter
+            ];
+            ai.innerHTML = `Einen Moment...<br><img src="${providers[0]}" onerror="this.src='${providers[1]}'">`;
         } else {
-            // MULTI-TEXT-BACKUP (Wechselt zwischen Modellen)
+            // Backup-System für Text (Wechselt bei Fehler)
             try {
-                // Erster Versuch: Pollinations OpenAI Modell
-                let res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(text)}?model=openai`);
-                
-                if (!res.ok) {
-                    // Zweiter Versuch: DuckDuckGo AI Bridge oder ähnliche freie Endpoints (Simuliert)
-                    aiBubble.innerText = "Backup-Modus: Pollinations ist gerade überlastet (502). Versuche es in 10 Sekunden nochmal oder nutze ein Bild-Prompt!";
-                } else {
-                    const data = await res.text();
-                    aiBubble.innerText = data;
+                let response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(text)}?model=mistral`);
+                if (!response.ok) throw new Error();
+                ai.innerText = await response.text();
+            } catch {
+                try {
+                    // Zweiter Versuch mit anderem Modell
+                    let response2 = await fetch(`https://text.pollinations.ai/${encodeURIComponent(text)}?model=openai`);
+                    ai.innerText = await response2.text();
+                } catch {
+                    ai.innerText = "Patrick, alle freien Systeme sind gerade überlastet. Probier es in 10 Sekunden nochmal!";
+                    ai.classList.add('error');
                 }
-            } catch (e) {
-                aiBubble.innerText = "Netzwerk-Fehler. Alle Systeme sind gerade down. Check mal dein Vercel-Deployment.";
             }
-            aiBubble.classList.remove('loading');
         }
         chat.scrollTo(0, chat.scrollHeight);
     }
@@ -99,14 +94,14 @@
         const d = document.createElement('div');
         d.className = `msg ${c}`;
         d.innerText = t;
-        chat.appendChild(d);
+        chat.appendChild(d, chat.firstChild);
         chat.scrollTo(0, chat.scrollHeight);
         return d;
     }
 
-    function quick(q) { input.value = q; handleRequest(q); }
-    btn.onclick = () => handleRequest(input.value);
-    input.onkeypress = (e) => { if(e.key === 'Enter') handleRequest(input.value); };
+    function quick(q) { input.value = q; handle(q); }
+    document.getElementById('sendBtn').onclick = () => handle(input.value);
+    input.onkeypress = (e) => { if(e.key === 'Enter') handle(input.value); };
 </script>
 </body>
 </html>
