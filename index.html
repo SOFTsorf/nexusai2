@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus Gemini Fixed</title>
+    <title>Gemini Nexus</title>
     <style>
         :root {
-            --bg: #000000;
-            --card-bg: #111111;
-            --text: #ffffff;
-            --sub-text: #b0b0b0;
+            --bg: #000;
+            --card: #111;
+            --text: #fff;
+            --sub: #888;
             --blue: #38bdf8;
         }
 
         body {
-            font-family: -apple-system, system-ui, sans-serif;
-            background-color: var(--bg);
+            font-family: -apple-system, sans-serif;
+            background: var(--bg);
             color: var(--text);
             margin: 0;
             display: flex;
@@ -23,7 +23,7 @@
             height: 100vh;
         }
 
-        header { padding: 20px; text-align: center; border-bottom: 1px solid #222; }
+        header { padding: 15px; text-align: center; border-bottom: 1px solid #222; font-size: 14px; color: var(--sub); }
 
         main {
             flex: 1;
@@ -34,28 +34,28 @@
             width: 100%;
         }
 
-        .welcome h1 { font-size: 32px; margin-bottom: 0; }
-        .welcome p { font-size: 32px; color: var(--sub-text); margin-top: 5px; }
+        .welcome h1 { font-size: 32px; font-weight: 500; margin: 50px 0 5px; }
+        .welcome p { font-size: 32px; color: var(--sub); margin: 0 0 30px; font-weight: 500; }
 
-        .pill-box { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .pill-box { display: flex; flex-direction: column; gap: 10px; }
         .pill {
             background: #1e1e1e;
             border: none;
             color: white;
             padding: 12px 20px;
             border-radius: 25px;
-            cursor: pointer;
             text-align: left;
+            cursor: pointer;
             width: fit-content;
         }
 
-        .msg { margin: 10px 0; padding: 12px 16px; border-radius: 18px; line-height: 1.5; max-width: 85%; }
-        .user-msg { background: var(--blue); color: black; align-self: flex-end; }
-        .ai-msg { background: #222; align-self: flex-start; border: 1px solid #333; }
+        .msg { margin: 10px 0; padding: 12px 18px; border-radius: 20px; max-width: 85%; line-height: 1.5; }
+        .user { background: var(--blue); color: black; align-self: flex-end; }
+        .ai { background: #1e1e1e; align-self: flex-start; border: 1px solid #333; }
 
-        .input-area { padding: 20px; display: flex; justify-content: center; }
-        .input-box {
-            background: #1e1e1e;
+        .footer { padding: 20px; display: flex; justify-content: center; }
+        .input-wrap {
+            background: #1a1a1a;
             width: 100%;
             max-width: 600px;
             border-radius: 30px;
@@ -65,29 +65,29 @@
             border: 1px solid #333;
         }
 
-        input { flex: 1; background: transparent; border: none; color: white; padding: 12px; outline: none; }
-        .send-btn { background: var(--blue); border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; }
+        input { flex: 1; background: transparent; border: none; color: white; padding: 12px; outline: none; font-size: 16px; }
+        .send-btn { background: var(--blue); border: none; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; }
+        .error { background: #311; color: #f66; border: 1px solid #522; font-size: 14px; }
     </style>
 </head>
 <body>
 
-<header>
-    <div style="color: #555; font-size: 12px;">Modell: gemini-2.0-flash</div>
-</header>
+<header>Nexus AI — Free Mode</header>
 
 <main id="chat">
-    <div id="welcome" class="welcome">
+    <div id="start" class="welcome">
         <h1>Hallo Patrick</h1>
         <p>Womit fangen wir an?</p>
         <div class="pill-box">
-            <button class="pill" onclick="sendQuick('Bild erstellen')">🎨 Bild erstellen</button>
-            <button class="pill" onclick="sendQuick('Hilf mir beim Lernen')">📚 Hilf mir beim Lernen</button>
+            <button class="pill" onclick="quick('Bild erstellen')">🎨 Bild erstellen</button>
+            <button class="pill" onclick="quick('Hilf mir beim Lernen')">📚 Hilf mir beim Lernen</button>
+            <button class="pill" onclick="quick('Etwas schreiben')">📄 Etwas schreiben</button>
         </div>
     </div>
 </main>
 
-<div class="input-area">
-    <div class="input-box">
+<div class="footer">
+    <div class="input-wrap">
         <input type="text" id="userInput" placeholder="Gemini fragen...">
         <button class="send-btn" id="sendBtn">↑</button>
     </div>
@@ -95,57 +95,55 @@
 
 <script>
     const API_KEY = "AIzaSyDbFvqgb2lOTzrN02zUq6vJ6Ik1GHk_nCw";
-    
-    // WICHTIG: Wir nutzen eines der Modelle, die in deinem Check als verfügbar angezeigt wurden!
-    const MODEL_ID = "gemini-2.0-flash"; 
+    // Wir nutzen hier das Standard-Modell, das am ehesten gratis funktioniert
+    const MODEL = "gemini-1.5-flash"; 
 
     const chat = document.getElementById('chat');
     const input = document.getElementById('userInput');
     const btn = document.getElementById('sendBtn');
-    const welcome = document.getElementById('welcome');
+    const start = document.getElementById('start');
 
-    async function ask(text) {
-        if (!text) return;
-        if (welcome) welcome.remove();
+    async function askAI(txt) {
+        if (!txt) return;
+        if (start) start.remove();
         
-        addMsg(text, 'user-msg');
-        const aiBubble = addMsg('...', 'ai-msg');
+        addBubble(txt, 'user');
+        const ai = addBubble('...', 'ai');
         input.value = '';
 
         try {
-            // Wir nutzen die stabile v1 URL
-            const url = `https://generativelanguage.googleapis.com/v1/models/${MODEL_ID}:generateContent?key=${API_KEY}`;
-            
-            const response = await fetch(url, {
+            // Wir nutzen die v1beta, falls v1 das Modell nicht findet
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: text }] }] })
+                body: JSON.stringify({ contents: [{ parts: [{ text: txt }] }] })
             });
 
-            const data = await response.json();
-            
+            const data = await res.json();
             if (data.error) {
-                aiBubble.innerHTML = `<span style="color:red">Fehler: ${data.error.message}</span>`;
+                ai.classList.add('error');
+                ai.innerText = "Fehler: " + data.error.message + "\n\nTipp: Falls da 'Limit 0' steht, erstelle einen NEUEN Key im AI Studio.";
             } else {
-                aiBubble.innerText = data.candidates[0].content.parts[0].text;
+                ai.innerText = data.candidates[0].content.parts[0].text;
             }
         } catch (e) {
-            aiBubble.innerText = "Fehler: " + e.message;
+            ai.innerText = "Verbindung fehlgeschlagen.";
         }
+        chat.scrollTo(0, chat.scrollHeight);
     }
 
-    function addMsg(t, cls) {
+    function addBubble(t, c) {
         const d = document.createElement('div');
-        d.className = `msg ${cls}`;
+        d.className = `msg ${c}`;
         d.innerText = t;
         chat.appendChild(d);
         chat.scrollTo(0, chat.scrollHeight);
         return d;
     }
 
-    function sendQuick(t) { input.value = t; ask(t); }
-    btn.onclick = () => ask(input.value);
-    input.onkeypress = (e) => { if(e.key === 'Enter') ask(input.value); };
+    function quick(q) { input.value = q; askAI(q); }
+    btn.onclick = () => askAI(input.value);
+    input.onkeypress = (e) => { if(e.key === 'Enter') askAI(input.value); };
 </script>
 
 </body>
