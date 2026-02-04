@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini Nexus AI</title>
+    <title>Nexus AI - Patrick Edition</title>
     <style>
         :root {
             --bg: #000;
@@ -14,7 +14,7 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, system-ui, sans-serif;
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
@@ -33,7 +33,7 @@
 
         .status-pill {
             background: #1a1a1a;
-            color: var(--sub);
+            color: #4caf50;
             padding: 5px 15px;
             border-radius: 20px;
             font-size: 12px;
@@ -52,8 +52,8 @@
         }
 
         .welcome-area { margin-top: 60px; }
-        .welcome-area h1 { font-size: 34px; font-weight: 500; margin-bottom: 0; }
-        .welcome-area p { font-size: 34px; color: var(--sub); margin-top: 5px; font-weight: 500; }
+        .welcome-area h1 { font-size: 34px; font-weight: 500; margin-bottom: 5px; }
+        .welcome-area p { font-size: 34px; color: var(--sub); margin-top: 0; font-weight: 500; }
 
         .pill-list { display: flex; flex-direction: column; gap: 12px; margin-top: 35px; }
         .pill {
@@ -66,15 +66,16 @@
             font-size: 16px;
             cursor: pointer;
             width: fit-content;
-            transition: 0.2s;
         }
-        .pill:hover { background: #2a2a2a; }
 
-        .msg { margin: 12px 0; padding: 14px 20px; border-radius: 22px; line-height: 1.6; max-width: 85%; font-size: 16px; }
-        .user-msg { background: var(--blue); color: #000; align-self: flex-end; font-weight: 500; }
-        .ai-msg { background: #181818; align-self: flex-start; border: 1px solid #222; }
+        .msg { margin: 12px 0; padding: 14px 20px; border-radius: 22px; line-height: 1.6; max-width: 85%; }
+        .user { background: var(--blue); color: #000; align-self: flex-end; font-weight: 500; }
+        .ai { background: #181818; align-self: flex-start; border: 1px solid #222; }
 
-        .input-section { padding: 25px; display: flex; justify-content: center; background: var(--bg); }
+        /* Bild-Style */
+        .ai img { width: 100%; border-radius: 15px; margin-top: 10px; }
+
+        .footer { padding: 25px; display: flex; justify-content: center; background: var(--bg); }
         .input-bar {
             background: #181818;
             width: 100%;
@@ -98,103 +99,84 @@
 
         .send-btn {
             background: var(--blue);
-            color: black;
             border: none;
             width: 36px;
             height: 36px;
             border-radius: 50%;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
+            font-weight: bold;
         }
-
-        .err-msg { background: #2d1414; color: #ff8080; border: 1px solid #4a1a1a; }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="status-pill">Gemini 1.5 Flash</div>
+    <div class="status-pill">Pollinations.ai (Free Mode)</div>
 </header>
 
-<main id="chatWindow">
-    <div id="startScreen" class="welcome-area">
+<main id="chat">
+    <div id="intro" class="welcome-area">
         <h1>Hallo Patrick</h1>
         <p>Womit fangen wir an?</p>
-        
         <div class="pill-list">
-            <button class="pill" onclick="quickAsk('Bild erstellen')">🎨 Bild erstellen</button>
-            <button class="pill" onclick="quickAsk('Hilf mir beim Lernen')">📚 Hilf mir beim Lernen</button>
-            <button class="pill" onclick="quickAsk('Etwas schreiben')">📄 Etwas schreiben</button>
+            <button class="pill" onclick="quick('Generiere ein Bild von einem Astronauten auf dem Mars')">🎨 Bild generieren</button>
+            <button class="pill" onclick="quick('Schreibe ein Gedicht über Programmieren')">📚 Etwas schreiben</button>
+            <button class="pill" onclick="quick('Was kannst du alles?')">✨ Fähigkeiten zeigen</button>
         </div>
     </div>
 </main>
 
-<div class="input-section">
+<div class="footer">
     <div class="input-bar">
-        <input type="text" id="userInput" placeholder="Gemini fragen..." autocomplete="off">
+        <input type="text" id="userInput" placeholder="Frage mich etwas..." autocomplete="off">
         <button class="send-btn" id="sendBtn">↑</button>
     </div>
 </div>
 
 <script>
-    // DEIN KEY (Falls dieser weiterhin 'Limit 0' liefert, ist das Projekt gesperrt)
-    const API_KEY = "AIzaSyDbFvqgb2lOTzrN02zUq6vJ6Ik1GHk_nCw";
-    const MODEL = "gemini-1.5-flash";
-
-    const chat = document.getElementById('chatWindow');
+    const chat = document.getElementById('chat');
     const input = document.getElementById('userInput');
     const btn = document.getElementById('sendBtn');
-    const start = document.getElementById('startScreen');
+    const intro = document.getElementById('intro');
 
-    async function callGemini(text) {
+    async function talk(text) {
         if (!text) return;
+        if (intro) intro.remove();
         
-        if (start) start.remove();
-        addBubble(text, 'user-msg');
-        const aiBubble = addBubble('...', 'ai-msg');
+        addBubble(text, 'user');
+        const aiBubble = addBubble('Denke nach...', 'ai');
         input.value = '';
 
-        try {
-            // Wir nutzen die v1 Schnittstelle, da diese oft bessere Quotas hat als v1beta
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/${MODEL}:generateContent?key=${API_KEY}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: text }] }] })
-            });
-
-            const data = await response.json();
-            
-            if (data.error) {
-                aiBubble.classList.add('err-msg');
-                if (data.error.message.includes('quota')) {
-                    aiBubble.innerText = "Quota-Fehler: Dein Projekt-Limit liegt bei 0. Bitte lösche alte Projekte in der Google Cloud Console, um Platz für ein neues, frisches Projekt zu machen.";
-                } else {
-                    aiBubble.innerText = "Fehler: " + data.error.message;
-                }
-            } else {
-                aiBubble.innerText = data.candidates[0].content.parts[0].text;
+        // Prüfen, ob nach einem BILD gefragt wird
+        if (text.toLowerCase().includes("bild") || text.toLowerCase().includes("generiere")) {
+            const seed = Math.floor(Math.random() * 1000);
+            const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(text)}?width=1024&height=1024&seed=${seed}&nologo=true`;
+            aiBubble.innerHTML = `Hier ist dein Bild:<br><img src="${imageUrl}" alt="AI Image">`;
+        } else {
+            // Normale Text-Anfrage (Pollinations Text API)
+            try {
+                const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(text)}?model=openai`);
+                const data = await response.text();
+                aiBubble.innerText = data;
+            } catch (e) {
+                aiBubble.innerText = "Hoppla, da gab es ein Problem mit der Verbindung.";
             }
-        } catch (e) {
-            aiBubble.innerText = "Netzwerkfehler. Bitte Internetverbindung prüfen.";
         }
         chat.scrollTo(0, chat.scrollHeight);
     }
 
-    function addBubble(text, type) {
-        const div = document.createElement('div');
-        div.className = `msg ${type}`;
-        div.innerText = text;
-        chat.appendChild(div);
+    function addBubble(t, c) {
+        const d = document.createElement('div');
+        d.className = `msg ${c}`;
+        d.innerText = t;
+        chat.appendChild(d);
         chat.scrollTo(0, chat.scrollHeight);
-        return div;
+        return d;
     }
 
-    function quickAsk(q) { input.value = q; callGemini(q); }
-    btn.onclick = () => callGemini(input.value);
-    input.onkeypress = (e) => { if(e.key === 'Enter') callGemini(input.value); };
+    function quick(q) { input.value = q; talk(q); }
+    btn.onclick = () => talk(input.value);
+    input.onkeypress = (e) => { if(e.key === 'Enter') talk(input.value); };
 </script>
 
 </body>
