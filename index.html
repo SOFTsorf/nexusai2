@@ -3,54 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio Testseite</title>
+    <title>Audio Streaming Test</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             height: 100vh;
-            background-color: #f4f4f9;
+            background-color: #121212;
+            color: white;
             margin: 0;
         }
-        .player-container {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        .card {
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             text-align: center;
-        }
-        h2 {
-            color: #333;
+            width: 350px;
         }
         audio {
-            margin-top: 15px;
-            width: 300px;
+            width: 100%;
+            margin-top: 20px;
+            filter: invert(100%) hue-rotate(180deg) brightness(1.5); /* Macht den Player auf dunklem Grund sichtbar */
         }
-        .status {
-            margin-top: 10px;
-            font-size: 0.8em;
-            color: #666;
+        .info {
+            font-size: 0.9em;
+            color: #bbb;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
 
-    <div class="player-container">
-        <h2>Mein Audio Player</h2>
-        <p>Datei wird von Google Drive geladen...</p>
+    <div class="card">
+        <div class="info">Google Drive Audio Stream</div>
+        <h2 id="title">Mein Track</h2>
         
-        <audio controls>
-            <source src="https://docs.google.com/uc?export=open&id=1yFGJStEA7zkhFGceS4pprWwuPudz5d8P" type="audio/mpeg">
+        <audio controls id="myAudio">
+            <source src="https://drive.google.com/uc?export=download&id=1yFGJStEA7zkhFGceS4pprWwuPudz5d8P" type="audio/mpeg">
             Dein Browser unterstützt das Audio-Element nicht.
         </audio>
 
-        <div class="status">
-            Hinweis: Falls kein Ton kommt, prüfe die Freigabe der Datei in Google Drive.
-        </div>
+        <p id="status" style="color: #ff4444; font-size: 0.8em; margin-top: 10px; display: none;">
+            Fehler: Datei konnte nicht geladen werden. Prüfe die Freigabe!
+        </p>
     </div>
+
+    <script>
+        const audio = document.getElementById('myAudio');
+        const status = document.getElementById('status');
+
+        // Check if there is an error loading the file
+        audio.addEventListener('error', function() {
+            status.style.display = 'block';
+        });
+    </script>
 
 </body>
 </html>
